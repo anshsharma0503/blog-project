@@ -4,6 +4,7 @@ const cookieParser = require("cookie-parser");
 
 const connectMongoDB = require("./services/mongodb");
 const userRoutes = require("./routes/user");
+const blogRoutes = require("./routes/blog");
 const { checkForAuthenticationCookie } = require("./middlewares/authentication");
 
 const app = express();
@@ -41,6 +42,7 @@ app.use(express.static(path.resolve("./public")));
    Routes
 ====================== */
 app.use("/user", userRoutes);
+app.use("/blog", blogRoutes);
 
 /* ======================
    Test Protected Route
@@ -54,7 +56,7 @@ app.get("/profile", (req, res) => {
 });
 
 /* ======================
-   Test Route
+   Home Route
 ====================== */
 app.get("/", (req, res) => {
     res.send("Server Running Successfully");

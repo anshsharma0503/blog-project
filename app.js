@@ -5,6 +5,7 @@ const cookieParser = require("cookie-parser");
 const connectMongoDB = require("./services/mongodb");
 const userRoutes = require("./routes/user");
 const blogRoutes = require("./routes/blog");
+const commentRoutes = require("./routes/comment");
 const { checkForAuthenticationCookie } = require("./middlewares/authentication");
 
 const app = express();
@@ -43,9 +44,10 @@ app.use(express.static(path.resolve("./public")));
 ====================== */
 app.use("/user", userRoutes);
 app.use("/blog", blogRoutes);
+app.use("/comment", commentRoutes);
 
 /* ======================
-   Test Protected Route
+   Profile Route (Test Auth)
 ====================== */
 app.get("/profile", (req, res) => {
     if (!req.user) {

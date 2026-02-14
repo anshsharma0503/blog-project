@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 
 const Blog = require("../models/blog");
+const Comment = require("../models/comment");
 
 
 // ======================
@@ -23,6 +24,7 @@ router.post("/create", async (req, res) => {
         });
 
         return res.json(blog);
+
     } catch (error) {
         console.log(error);
         return res.status(500).send("Error creating blog");
@@ -40,12 +42,17 @@ router.get("/", async (req, res) => {
             .sort({ createdAt: -1 });
 
         return res.json(blogs);
+
     } catch (error) {
         console.log(error);
         return res.status(500).send("Error fetching blogs");
     }
 });
 
+
+// ======================
+// Get Blog + Comments
+// ======================
 router.get("/:id", async (req, res) => {
     try {
         const blog = await Blog.findById(req.params.id)
@@ -55,39 +62,27 @@ router.get("/:id", async (req, res) => {
             return res.status(404).send("Blog not found");
         }
 
-        return res.json(blog);
-    } catch (error) {
-        console.log(error);
-        return res.status(500).send("Error fetching blog");
-    }
-});
+        const comments = await Comment.find({
+            blogId: req.params.id
+        })
+        .populate("createdBy", "-password")
+        .sort({ createdAt: -1 });
 
-router.delete("/:id", async (req, res) => {
-    try {
-        if (!req.user) {
-            return res.status(401).send("Login required");
-        }
-
-        const blog = await Blog.findById(req.params.id);
-
-        if (!blog) {
-            return res.status(404).send("Blog not found");
-        }
-
-        if (blog.createdBy.toString() !== req.user._id.toString()) {
-            return res.status(403).send("You are not allowed to delete this blog");
-        }
-
-        await Blog.findByIdAndDelete(req.params.id);
-
-        return res.send("Blog deleted successfully");
+        return res.json({
+            blog,
+            comments
+        });
 
     } catch (error) {
         console.log(error);
-        return res.status(500).send("Error deleting blog");
+        return res.status(500).send("Error fetching blog details");
     }
 });
 
+
+// ======================
+// Update Blog
+// ======================
 router.put("/:id", async (req, res) => {
     try {
         if (!req.user) {
@@ -101,7 +96,7 @@ router.put("/:id", async (req, res) => {
         }
 
         if (blog.createdBy.toString() !== req.user._id.toString()) {
-            return res.status(403).send("You are not allowed to edit this blog");
+            return res.status(403).send("Not allowed to edit this blog");
         }
 
         const { title, body } = req.body;
@@ -119,6 +114,35 @@ router.put("/:id", async (req, res) => {
     }
 });
 
+
+// ======================
+// Delete Blog
+// ======================
+router.delete("/:id", async (req, res) => {
+    try {
+        if (!req.user) {
+            return res.status(401).send("Login required");
+        }
+
+        const blog = await Blog.findById(req.params.id);
+
+        if (!blog) {
+            return res.status(404).send("Blog not found");
+        }
+
+        if (blog.createdBy.toString() !== req.user._id.toString()) {
+            return res.status(403).send("Not allowed to delete this blog");
+        }
+
+        await Blog.findByIdAndDelete(req.params.id);
+
+        return res.send("Blog deleted successfully");
+
+    } catch (error) {
+        console.log(error);
+        return res.status(500).send("Error deleting blog");
+    }
+});
 
 
 module.exports = router;

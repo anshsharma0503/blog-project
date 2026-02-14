@@ -3,10 +3,14 @@ const path = require("path");
 const cookieParser = require("cookie-parser");
 
 const connectMongoDB = require("./services/mongodb");
+
 const userRoutes = require("./routes/user");
 const blogRoutes = require("./routes/blog");
 const commentRoutes = require("./routes/comment");
+
 const { checkForAuthenticationCookie } = require("./middlewares/authentication");
+
+const Blog = require("./models/blog");
 
 const app = express();
 const PORT = 8000;
@@ -25,7 +29,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 
-// Authentication Middleware
+/* Authentication middleware */
 app.use(checkForAuthenticationCookie);
 
 /* ======================
@@ -35,7 +39,7 @@ app.set("view engine", "ejs");
 app.set("views", path.resolve("./views"));
 
 /* ======================
-   Static Files Setup
+   Static Files
 ====================== */
 app.use(express.static(path.resolve("./public")));
 
@@ -47,21 +51,31 @@ app.use("/blog", blogRoutes);
 app.use("/comment", commentRoutes);
 
 /* ======================
-   Profile Route (Test Auth)
+   Homepage (Render Blogs)
 ====================== */
-app.get("/profile", (req, res) => {
-    if (!req.user) {
-        return res.send("Not Logged In");
-    }
+app.get("/", async (req, res) => {
+    try {
+        const blogs = await Blog.find({})
+            .populate("createdBy", "fullName profileImageURL")
+            .sort({ createdAt: -1 });
 
-    return res.json(req.user);
+        res.render("home", {
+            user: req.user,
+            blogs
+        });
+
+    } catch (error) {
+        console.log(error);
+        res.status(500).send("Error loading homepage");
+    }
 });
 
 /* ======================
-   Home Route
+   Profile Test Route
 ====================== */
-app.get("/", (req, res) => {
-    res.send("Server Running Successfully");
+app.get("/profile", (req, res) => {
+    if (!req.user) return res.send("Not Logged In");
+    res.json(req.user);
 });
 
 /* ======================

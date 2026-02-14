@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create Blog</title>
+</head>
+<body>
+
+<% if(user){ %>
+    <p>
+        Logged in as <strong><%= user.fullName %></strong>
+        |
+        <a href="/user/logout">Logout</a>
+    </p>
+<% } %>
+
+<h1>Create Blog</h1>
+
+<form method="POST" action="/blog/create">
+
+    <input type="text" name="title" placeholder="Blog Title" required>
+    <br><br>
+
+    <textarea name="body" placeholder="Blog Content" required></textarea>
+    <br><br>
+
+    <button type="submit">Publish Blog</button>
+
+</form>
+
+<br>
+<a href="/">Back to Home</a>
+
+</body>
+</html>

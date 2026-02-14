@@ -43,7 +43,7 @@ router.get("/blog/:blogId", async (req, res) => {
         .populate("createdBy", "fullName profileImageURL")
         .sort({ createdAt: -1 });
 
-        return res.json(comments);
+        return res.redirect("/blog/view/" + blogId);
 
     } catch (error) {
         console.log(error);

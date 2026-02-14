@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Blog Homepage</title>
+</head>
+<body>
+
+<!-- LOGIN / LOGOUT AREA -->
+
+<% if(user){ %>
+
+    <p>
+        Logged in as <strong><%= user.fullName %></strong>
+        |
+        <a href="/user/logout">Logout</a>
+    </p>
+
+    <p>
+        <a href="/blog/new">Create New Blog</a>
+    </p>
+
+<% } else { %>
+
+    <p>
+        <a href="/user/login">Login</a> |
+        <a href="/user/signup">Signup</a>
+    </p>
+
+<% } %>
+
+
+<hr>
+
+<h1>All Blogs</h1>
+
+
+<!-- BLOG LIST -->
+
+<% blogs.forEach(function(blog){ %>
+
+    <div style="margin-bottom:25px;">
+
+        <h2>
+            <a href="/blog/view/<%= blog._id %>">
+                <%= blog.title %>
+            </a>
+        </h2>
+
+        <p><%= blog.body.substring(0,120) %>...</p>
+
+        <small>
+            By <%= blog.createdBy.fullName %>
+        </small>
+
+    </div>
+
+<% }) %>
+
+
+</body>
+</html>

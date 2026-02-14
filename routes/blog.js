@@ -6,37 +6,81 @@ const Comment = require("../models/comment");
 
 
 // ======================
+// Render Create Blog Page  (MUST COME BEFORE /:id)
+// ======================
+router.get("/new", (req, res) => {
+    if (!req.user) {
+        return res.redirect("/user/login");
+    }
+    res.render("createBlog", { user: req.user });
+});
+
+
+// ======================
+// Render Blog Page UI
+// ======================
+router.get("/view/:id", async (req, res) => {
+    try {
+
+        const blog = await Blog.findById(req.params.id)
+            .populate("createdBy", "fullName profileImageURL");
+
+        if (!blog) return res.send("Blog not found");
+
+        const comments = await Comment.find({ blogId: req.params.id })
+            .populate("createdBy", "fullName profileImageURL")
+            .sort({ createdAt: -1 });
+
+        res.render("blog", {
+            user: req.user,
+            blog,
+            comments
+        });
+
+    } catch (err) {
+        console.log(err);
+        res.send("Error loading blog page");
+    }
+});
+
+
+// ======================
 // Create Blog
 // ======================
 router.post("/create", async (req, res) => {
+
     try {
+
         if (!req.user) {
             return res.status(401).send("Login required");
         }
 
         const { title, body } = req.body;
 
-        const blog = await Blog.create({
+        await Blog.create({
             title,
             body,
             coverImageURL: "/images/default.png",
             createdBy: req.user._id,
         });
 
-        return res.json(blog);
+        return res.redirect("/");
 
     } catch (error) {
         console.log(error);
         return res.status(500).send("Error creating blog");
     }
+
 });
 
 
 // ======================
-// Get All Blogs
+// Get All Blogs (API)
 // ======================
 router.get("/", async (req, res) => {
+
     try {
+
         const blogs = await Blog.find({})
             .populate("createdBy", "fullName profileImageURL")
             .sort({ createdAt: -1 });
@@ -47,26 +91,28 @@ router.get("/", async (req, res) => {
         console.log(error);
         return res.status(500).send("Error fetching blogs");
     }
+
 });
 
 
 // ======================
-// Get Blog + Comments
+// Get Blog + Comments (API)
+// THIS MUST BE LAST
 // ======================
 router.get("/:id", async (req, res) => {
+
     try {
+
         const blog = await Blog.findById(req.params.id)
-            .populate("createdBy", "fullName profileImageURL")
+            .populate("createdBy", "fullName profileImageURL");
 
         if (!blog) {
             return res.status(404).send("Blog not found");
         }
 
-        const comments = await Comment.find({
-            blogId: req.params.id
-        })
-        .populate("createdBy", "fullName profileImageURL")
-        .sort({ createdAt: -1 });
+        const comments = await Comment.find({ blogId: req.params.id })
+            .populate("createdBy", "fullName profileImageURL")
+            .sort({ createdAt: -1 });
 
         return res.json({
             blog,
@@ -77,6 +123,7 @@ router.get("/:id", async (req, res) => {
         console.log(error);
         return res.status(500).send("Error fetching blog details");
     }
+
 });
 
 
@@ -84,16 +131,16 @@ router.get("/:id", async (req, res) => {
 // Update Blog
 // ======================
 router.put("/:id", async (req, res) => {
+
     try {
+
         if (!req.user) {
             return res.status(401).send("Login required");
         }
 
         const blog = await Blog.findById(req.params.id);
 
-        if (!blog) {
-            return res.status(404).send("Blog not found");
-        }
+        if (!blog) return res.status(404).send("Blog not found");
 
         if (blog.createdBy.toString() !== req.user._id.toString()) {
             return res.status(403).send("Not allowed to edit this blog");
@@ -112,6 +159,7 @@ router.put("/:id", async (req, res) => {
         console.log(error);
         return res.status(500).send("Error updating blog");
     }
+
 });
 
 
@@ -119,16 +167,16 @@ router.put("/:id", async (req, res) => {
 // Delete Blog
 // ======================
 router.delete("/:id", async (req, res) => {
+
     try {
+
         if (!req.user) {
             return res.status(401).send("Login required");
         }
 
         const blog = await Blog.findById(req.params.id);
 
-        if (!blog) {
-            return res.status(404).send("Blog not found");
-        }
+        if (!blog) return res.status(404).send("Blog not found");
 
         if (blog.createdBy.toString() !== req.user._id.toString()) {
             return res.status(403).send("Not allowed to delete this blog");
@@ -142,7 +190,7 @@ router.delete("/:id", async (req, res) => {
         console.log(error);
         return res.status(500).send("Error deleting blog");
     }
-});
 
+});
 
 module.exports = router;

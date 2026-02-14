@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Blog</title>
+</head>
+
+<body>
+    <% if(user){ %>
+        <p>
+            Logged in as <strong>
+                <%= user.fullName %>
+            </strong>
+            |
+            <a href="/user/logout">Logout</a>
+        </p>
+        <% } else { %>
+            <p>
+                <a href="/user/login">Login</a>
+            </p>
+            <% } %>
+
+
+                <h1>
+                    <%= blog.title %>
+                </h1>
+
+                <p>
+                    <%= blog.body %>
+                </p>
+
+                <p>
+                    <strong>Author:</strong>
+                    <%= blog.createdBy.fullName %>
+                </p>
+
+                <hr>
+
+                <h2>Comments</h2>
+
+                <% if(comments.length===0){ %>
+                    <p>No comments yet</p>
+                    <% } %>
+
+                        <% comments.forEach(function(comment){ %>
+
+                            <div style="margin-bottom:15px;">
+                                <p>
+                                    <%= comment.content %>
+                                </p>
+                                <small>By <%= comment.createdBy.fullName %></small>
+                            </div>
+
+                            <% }) %>
+                                <hr>
+
+                                <h3>Add Comment</h3>
+
+                                <form method="POST" action="/comment/create">
+
+                                    <input type="hidden" name="blogId" value="<%= blog._id %>">
+
+                                    <textarea name="content" placeholder="Write comment..." required></textarea>
+
+                                    <br><br>
+
+                                    <button type="submit">Add Comment</button>
+
+                                </form>
+
+
+</body>
+
+</html>

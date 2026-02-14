@@ -40,7 +40,7 @@ router.get("/blog/:blogId", async (req, res) => {
         const comments = await Comment.find({
             blogId: req.params.blogId
         })
-        .populate("createdBy", "-password")
+        .populate("createdBy", "fullName profileImageURL")
         .sort({ createdAt: -1 });
 
         return res.json(comments);

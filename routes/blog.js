@@ -38,7 +38,7 @@ router.post("/create", async (req, res) => {
 router.get("/", async (req, res) => {
     try {
         const blogs = await Blog.find({})
-            .populate("createdBy", "-password")
+            .populate("createdBy", "fullName profileImageURL")
             .sort({ createdAt: -1 });
 
         return res.json(blogs);
@@ -56,7 +56,7 @@ router.get("/", async (req, res) => {
 router.get("/:id", async (req, res) => {
     try {
         const blog = await Blog.findById(req.params.id)
-            .populate("createdBy", "-password");
+            .populate("createdBy", "fullName profileImageURL")
 
         if (!blog) {
             return res.status(404).send("Blog not found");
@@ -65,7 +65,7 @@ router.get("/:id", async (req, res) => {
         const comments = await Comment.find({
             blogId: req.params.id
         })
-        .populate("createdBy", "-password")
+        .populate("createdBy", "fullName profileImageURL")
         .sort({ createdAt: -1 });
 
         return res.json({

@@ -1,32 +1,44 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Signup</title>
+<title>Signup</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100">
 
-<h1>Create Account</h1>
+<%- include("partials/navbar") %>
 
-<form method="POST" action="/user/signup">
+<div class="flex justify-center mt-16">
 
-    <input type="text" name="fullName" placeholder="Full Name" required>
-    <br><br>
+<form method="POST" action="/user/signup"
+class="bg-white shadow rounded-xl p-8 w-80">
 
-    <input type="email" name="email" placeholder="Email" required>
-    <br><br>
+<h1 class="text-2xl font-bold mb-6 text-center">Signup</h1>
 
-    <input type="password" name="password" placeholder="Password" required>
-    <br><br>
+<input name="fullName"
+placeholder="Full Name"
+class="w-full border rounded p-2 mb-4"
+required>
 
-    <button type="submit">Signup</button>
+<input name="email"
+type="email"
+placeholder="Email"
+class="w-full border rounded p-2 mb-4"
+required>
+
+<input name="password"
+type="password"
+placeholder="Password"
+class="w-full border rounded p-2 mb-4"
+required>
+
+<button class="bg-green-600 text-white w-full p-2 rounded hover:bg-green-700">
+Signup
+</button>
 
 </form>
 
-<br>
-<p>
-Already have an account?
-<a href="/user/login">Login</a>
-</p>
+</div>
 
 </body>
 </html>

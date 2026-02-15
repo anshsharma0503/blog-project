@@ -1,61 +1,43 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Blog Homepage</title>
+<title>BlogApp</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
+<body class="bg-gray-100">
 
-<!-- LOGIN / LOGOUT AREA -->
+<%- include("partials/navbar") %>
 
-<% if(user){ %>
+<div class="max-w-3xl mx-auto mt-10">
 
-    <p>
-        Logged in as <strong><%= user.fullName %></strong>
-        |
-        <a href="/user/logout">Logout</a>
-    </p>
+<h1 class="text-3xl font-bold mb-6">All Blogs</h1>
 
-    <p>
-        <a href="/blog/new">Create New Blog</a>
-    </p>
+<div class="grid gap-6">
 
-<% } else { %>
+<% blogs.forEach(blog => { %>
 
-    <p>
-        <a href="/user/login">Login</a> |
-        <a href="/user/signup">Signup</a>
-    </p>
+<div class="bg-white shadow rounded-xl p-6 hover:shadow-lg">
 
-<% } %>
+<h2 class="text-2xl font-semibold">
+<a href="/blog/view/<%= blog._id %>" class="hover:text-blue-600">
+<%= blog.title %>
+</a>
+</h2>
 
+<p class="text-gray-700 mt-2">
+<%= blog.body.substring(0,150) %>...
+</p>
 
-<hr>
+<p class="text-gray-500 mt-3 text-sm">
+By <%= blog.createdBy.fullName %>
+</p>
 
-<h1>All Blogs</h1>
-
-
-<!-- BLOG LIST -->
-
-<% blogs.forEach(function(blog){ %>
-
-    <div style="margin-bottom:25px;">
-
-        <h2>
-            <a href="/blog/view/<%= blog._id %>">
-                <%= blog.title %>
-            </a>
-        </h2>
-
-        <p><%= blog.body.substring(0,120) %>...</p>
-
-        <small>
-            By <%= blog.createdBy.fullName %>
-        </small>
-
-    </div>
+</div>
 
 <% }) %>
 
+</div>
+</div>
 
 </body>
 </html>

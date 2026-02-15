@@ -1,0 +1,24 @@
+<nav class="bg-gray-900 text-white p-4 flex justify-between">
+
+    <a href="/" class="font-bold text-lg">BlogApp</a>
+
+    <div>
+
+        <% if(user){ %>
+
+            <a href="/blog/new" class="mr-4 hover:underline">Create Blog</a>
+
+            <span class="mr-4"><%= user.fullName %></span>
+
+            <a href="/user/logout" class="hover:underline">Logout</a>
+
+        <% } else { %>
+
+            <a href="/user/login" class="mr-4 hover:underline">Login</a>
+            <a href="/user/signup" class="hover:underline">Signup</a>
+
+        <% } %>
+
+    </div>
+
+</nav>

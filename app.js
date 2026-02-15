@@ -32,6 +32,12 @@ app.use(cookieParser());
 /* Authentication middleware */
 app.use(checkForAuthenticationCookie);
 
+app.use((req, res, next) => {
+    res.locals.user = req.user;
+    next();
+});
+
+
 /* ======================
    View Engine Setup
 ====================== */

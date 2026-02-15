@@ -1,110 +1,58 @@
-/* 
-THIS ROUTE WILL: (/create)
-
-Receive comment text
-Receive blog ID
-Check user is logged in
-Create comment document
-Return created comment
-
- */
-
 const express = require("express");
 const router = express.Router();
-
 const Comment = require("../models/comment");
 
+
+// CREATE COMMENT
 router.post("/create", async (req, res) => {
-    try {
-        if (!req.user) {
-            return res.status(401).send("Login required");
-        }
 
-        const { content, blogId } = req.body;
+    if (!req.user) return res.send("Login required");
 
-        const comment = await Comment.create({
-            content,
-            blogId,
-            createdBy: req.user._id,
-        });
+    const { content, blogId } = req.body;
 
-        return res.json(comment);
+    await Comment.create({
+        content,
+        blogId,
+        createdBy: req.user._id,
+    });
 
-    } catch (error) {
-        console.log(error);
-        return res.status(500).send("Error creating comment");
-    }
-});
-router.get("/blog/:blogId", async (req, res) => {
-    try {
-        const comments = await Comment.find({
-            blogId: req.params.blogId
-        })
-        .populate("createdBy", "fullName profileImageURL")
-        .sort({ createdAt: -1 });
-
-        return res.redirect("/blog/view/" + blogId);
-
-    } catch (error) {
-        console.log(error);
-        return res.status(500).send("Error fetching comments");
-    }
-});
-router.delete("/:id", async (req, res) => {
-    try {
-        if (!req.user) {
-            return res.status(401).send("Login required");
-        }
-
-        const comment = await Comment.findById(req.params.id);
-
-        if (!comment) {
-            return res.status(404).send("Comment not found");
-        }
-
-        if (comment.createdBy.toString() !== req.user._id.toString()) {
-            return res.status(403).send("Not allowed to delete this comment");
-        }
-
-        await Comment.findByIdAndDelete(req.params.id);
-
-        return res.send("Comment deleted successfully");
-
-    } catch (error) {
-        console.log(error);
-        return res.status(500).send("Error deleting comment");
-    }
-});
-router.put("/:id", async (req, res) => {
-    try {
-        if (!req.user) {
-            return res.status(401).send("Login required");
-        }
-
-        const comment = await Comment.findById(req.params.id);
-
-        if (!comment) {
-            return res.status(404).send("Comment not found");
-        }
-
-        if (comment.createdBy.toString() !== req.user._id.toString()) {
-            return res.status(403).send("Not allowed to edit this comment");
-        }
-
-        const { content } = req.body;
-
-        comment.content = content || comment.content;
-
-        await comment.save();
-
-        return res.json(comment);
-
-    } catch (error) {
-        console.log(error);
-        return res.status(500).send("Error updating comment");
-    }
+    res.redirect("/blog/view/" + blogId);
 });
 
 
+// DELETE COMMENT
+router.post("/delete/:id", async (req, res) => {
+
+    const comment = await Comment.findById(req.params.id);
+
+    if (!comment) return res.send("Not found");
+
+    if (comment.createdBy.toString() !== req.user._id.toString())
+        return res.send("Not allowed");
+
+    const blogId = comment.blogId;
+
+    await Comment.findByIdAndDelete(req.params.id);
+
+    res.redirect("/blog/view/" + blogId);
+});
+
+
+// UPDATE COMMENT
+router.post("/edit/:id", async (req, res) => {
+
+    const comment = await Comment.findById(req.params.id);
+
+    if (!comment) return res.send("Not found");
+
+    if (comment.createdBy.toString() !== req.user._id.toString())
+        return res.send("Not allowed");
+
+    comment.content = req.body.content;
+
+    await comment.save();
+
+    res.redirect("/blog/view/" + comment.blogId);
+});
 
 module.exports = router;

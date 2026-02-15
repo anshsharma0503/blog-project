@@ -1,74 +1,83 @@
 <!DOCTYPE html>
 <html>
-
 <head>
-    <title>Blog</title>
+<title><%= blog.title %></title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
+<body class="bg-gray-100">
 
-<body>
-    <% if(user){ %>
-        <p>
-            Logged in as <strong>
-                <%= user.fullName %>
-            </strong>
-            |
-            <a href="/user/logout">Logout</a>
-        </p>
-        <% } else { %>
-            <p>
-                <a href="/user/login">Login</a>
-            </p>
-            <% } %>
+<%- include("partials/navbar") %>
+
+<div class="max-w-3xl mx-auto mt-10 bg-white p-8 shadow rounded-xl">
+
+<h1 class="text-3xl font-bold"><%= blog.title %></h1>
+
+<p class="mt-4"><%= blog.body %></p>
+
+<p class="text-gray-500 mt-4">By <%= blog.createdBy.fullName %></p>
 
 
-                <h1>
-                    <%= blog.title %>
-                </h1>
+<% if(user && user._id == blog.createdBy._id){ %>
 
-                <p>
-                    <%= blog.body %>
-                </p>
+<a href="/blog/edit/<%= blog._id %>"
+class="bg-yellow-500 text-white px-3 py-1 rounded mr-2">Edit</a>
 
-                <p>
-                    <strong>Author:</strong>
-                    <%= blog.createdBy.fullName %>
-                </p>
+<form method="POST" action="/blog/delete/<%= blog._id %>" class="inline">
+<button class="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
+</form>
 
-                <hr>
+<% } %>
 
-                <h2>Comments</h2>
+<hr class="my-6">
 
-                <% if(comments.length===0){ %>
-                    <p>No comments yet</p>
-                    <% } %>
 
-                        <% comments.forEach(function(comment){ %>
+<h2 class="text-xl font-semibold mb-4">Comments</h2>
 
-                            <div style="margin-bottom:15px;">
-                                <p>
-                                    <%= comment.content %>
-                                </p>
-                                <small>By <%= comment.createdBy.fullName %></small>
-                            </div>
+<% comments.forEach(c => { %>
 
-                            <% }) %>
-                                <hr>
+<div class="border-b py-3">
 
-                                <h3>Add Comment</h3>
+<p><%= c.content %></p>
+<p class="text-gray-500 text-sm">— <%= c.createdBy.fullName %></p>
 
-                                <form method="POST" action="/comment/create">
+<% if(user && user._id == c.createdBy._id){ %>
 
-                                    <input type="hidden" name="blogId" value="<%= blog._id %>">
+<form method="POST" action="/comment/delete/<%= c._id %>" class="inline">
+<button class="text-red-600 mr-3">Delete</button>
+</form>
 
-                                    <textarea name="content" placeholder="Write comment..." required></textarea>
+<form method="POST" action="/comment/edit/<%= c._id %>" class="inline">
+<input name="content" value="<%= c.content %>" class="border p-1 rounded">
+<button class="text-blue-600">Update</button>
+</form>
 
-                                    <br><br>
+<% } %>
 
-                                    <button type="submit">Add Comment</button>
+</div>
 
-                                </form>
+<% }) %>
 
+
+<% if(user){ %>
+
+<form method="POST" action="/comment/create" class="mt-6">
+
+<input type="hidden" name="blogId" value="<%= blog._id %>">
+
+<textarea name="content"
+class="w-full border rounded p-2 mb-3"
+placeholder="Write comment..."
+required></textarea>
+
+<button class="bg-blue-600 text-white px-4 py-2 rounded">
+Add Comment
+</button>
+
+</form>
+
+<% } %>
+
+</div>
 
 </body>
-
 </html>

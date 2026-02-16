@@ -1,6 +1,7 @@
 const express = require("express");
 const path = require("path");
 const cookieParser = require("cookie-parser");
+const dotenv=require('dotenv');
 
 const connectMongoDB = require("./services/mongodb");
 
@@ -11,16 +12,15 @@ const commentRoutes = require("./routes/comment");
 const { checkForAuthenticationCookie } = require("./middlewares/authentication");
 
 const Blog = require("./models/blog");
+const connectDb = require("./config/db");
 
 const app = express();
-const PORT = 8000;
 
-/* ======================
-   MongoDB Connection
-====================== */
-connectMongoDB("mongodb://127.0.0.1:27017/blog-project")
-    .then(() => console.log("MongoDB Connected"))
-    .catch((err) => console.log("Mongo Error:", err));
+
+dotenv.config();
+const PORT = process.env.PORT||8000;
+
+
 
 /* ======================
    Middlewares
@@ -87,6 +87,14 @@ app.get("/profile", (req, res) => {
 /* ======================
    Start Server
 ====================== */
-app.listen(PORT, () => {
+const startServer=async()=>{
+    await connectDb();
+
+    app.listen(PORT, () => {
     console.log(`Server started at PORT ${PORT}`);
 });
+
+}
+
+
+startServer();

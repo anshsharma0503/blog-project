@@ -9,6 +9,10 @@ const { createTokenForUser } = require("../services/auth");
 // Render Login Page
 // ======================
 router.get("/login", (req, res) => {
+
+    // already logged in → go home
+    if (req.user) return res.redirect("/");
+
     res.render("login");
 });
 
@@ -17,6 +21,9 @@ router.get("/login", (req, res) => {
 // Render Signup Page
 // ======================
 router.get("/signup", (req, res) => {
+
+    if (req.user) return res.redirect("/");
+
     res.render("signup");
 });
 
@@ -28,10 +35,23 @@ router.post("/signup", async (req, res) => {
 
     try {
 
-        const { fullName, email, password } = req.body;
+        let { fullName, email, password } = req.body;
+
+        // basic validation
+        if (!fullName || !email || !password) {
+            return res.send("All fields required");
+        }
+
+        // normalize email
+        email = email.toLowerCase().trim();
+
+        // basic password strength (minimal but prevents garbage)
+        if (password.length < 6) {
+            return res.send("Password must be at least 6 characters");
+        }
 
         await User.create({
-            fullName,
+            fullName: fullName.trim(),
             email,
             password,
         });
@@ -40,7 +60,6 @@ router.post("/signup", async (req, res) => {
 
     } catch (error) {
 
-        // duplicate email handling
         if (error.code === 11000) {
             return res.send("Email already registered. Try logging in.");
         }
@@ -60,23 +79,33 @@ router.post("/signin", async (req, res) => {
 
     try {
 
-        const { email, password } = req.body;
+        let { email, password } = req.body;
 
-        const user = await User.findOne({ email });
-
-        if (!user) {
-            return res.send("Invalid Email or Password");
+        if (!email || !password) {
+            return res.send("Email and password required");
         }
 
-        const isMatch = await user.comparePassword(password);
+        email = email.toLowerCase().trim();
 
-        if (!isMatch) {
+        // fetch user OR dummy object to prevent timing leaks
+        const user = await User.findOne({ email });
+
+        // always run bcrypt compare if user exists
+        const isMatch = user ? await user.comparePassword(password) : false;
+
+        if (!user || !isMatch) {
             return res.send("Invalid Email or Password");
         }
 
         const token = createTokenForUser(user);
 
-        res.cookie("token", token);
+        // production-safe cookie
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === "production",
+            sameSite: "lax",
+            maxAge: 24 * 60 * 60 * 1000,
+        });
 
         return res.redirect("/");
 
@@ -95,7 +124,12 @@ router.post("/signin", async (req, res) => {
 // ======================
 router.get("/logout", (req, res) => {
 
-    res.clearCookie("token");
+    res.clearCookie("token", {
+        httpOnly: true,
+        sameSite: "lax",
+        secure: process.env.NODE_ENV === "production",
+    });
+
     return res.redirect("/");
 
 });

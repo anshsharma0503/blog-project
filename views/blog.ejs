@@ -1,83 +1,150 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title><%= blog.title %></title>
-<script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title><%= blog.title %> – BlogApp</title>
+    <meta name="description" content="<%= blog.body.substring(0,150) %>">
+    <link rel="stylesheet" href="/style.css">
 </head>
-<body class="bg-gray-100">
+<body>
 
-<%- include("partials/navbar") %>
+<%- include('partials/navbar') %>
 
-<div class="max-w-3xl mx-auto mt-10 bg-white p-8 shadow rounded-xl">
+<div class="page-wrap">
+<div class="container-md" style="padding-top:2rem;padding-bottom:4rem;">
 
-<h1 class="text-3xl font-bold"><%= blog.title %></h1>
+    <!-- Cover Image -->
+    <img
+        class="blog-cover"
+        src="<%= blog.coverImageURL %>"
+        alt="<%= blog.title %>"
+        onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"
+    >
+    <div class="blog-cover-placeholder" style="display:none;">✍️</div>
 
-<p class="mt-4"><%= blog.body %></p>
+    <!-- Title -->
+    <h1 class="blog-detail-title"><%= blog.title %></h1>
 
-<p class="text-gray-500 mt-4">By <%= blog.createdBy.fullName %></p>
+    <!-- Author row -->
+    <div class="blog-author-row">
+        <div class="avatar avatar-lg">
+            <%= blog.createdBy.fullName.charAt(0).toUpperCase() %>
+        </div>
+        <div>
+            <div class="blog-author-name"><%= blog.createdBy.fullName %></div>
+            <div class="blog-date">
+                <%= new Date(blog.createdAt).toLocaleDateString('en-US',{weekday:'long',year:'numeric',month:'long',day:'numeric'}) %>
+            </div>
+        </div>
+
+        <!-- Owner actions -->
+        <% if(user && user._id == blog.createdBy._id){ %>
+        <div class="blog-actions" style="margin-top:0;margin-left:auto;">
+            <a href="/blog/edit/<%= blog._id %>" class="btn btn-warning btn-sm">✏️ Edit</a>
+            <form method="POST" action="/blog/delete/<%= blog._id %>" onsubmit="return confirm('Delete this post?');">
+                <button type="submit" class="btn btn-danger btn-sm">🗑 Delete</button>
+            </form>
+        </div>
+        <% } %>
+    </div>
+
+    <!-- Body -->
+    <div class="blog-body"><%= blog.body %></div>
+
+    <div class="divider" style="margin-top:3rem;"></div>
 
 
-<% if(user && user._id == blog.createdBy._id){ %>
+    <!-- ===================== COMMENTS ===================== -->
+    <div class="comments-section">
 
-<a href="/blog/edit/<%= blog._id %>"
-class="bg-yellow-500 text-white px-3 py-1 rounded mr-2">Edit</a>
+        <h2 class="comments-title">
+            💬 Comments
+            <span style="font-size:.9rem;font-weight:400;color:var(--text-3);margin-left:.4rem;">(<%= comments.length %>)</span>
+        </h2>
 
-<form method="POST" action="/blog/delete/<%= blog._id %>" class="inline">
-<button class="bg-red-600 text-white px-3 py-1 rounded">Delete</button>
-</form>
+        <!-- Comment list -->
+        <% if(comments.length === 0){ %>
+        <div style="padding:2rem 0;color:var(--text-3);font-size:.9rem;">
+            No comments yet. Be the first to share your thoughts!
+        </div>
+        <% } %>
 
-<% } %>
+        <% comments.forEach(function(c){ %>
+        <div class="comment-card" id="comment-<%= c._id %>">
 
-<hr class="my-6">
+            <div class="comment-header">
+                <div class="avatar" style="width:28px;height:28px;font-size:.68rem;">
+                    <%= c.createdBy.fullName.charAt(0).toUpperCase() %>
+                </div>
+                <span class="comment-author"><%= c.createdBy.fullName %></span>
+                <span class="comment-date">
+                    <%= new Date(c.createdAt).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) %>
+                </span>
+            </div>
 
+            <p class="comment-text" id="text-<%= c._id %>"><%= c.content %></p>
 
-<h2 class="text-xl font-semibold mb-4">Comments</h2>
+            <% if(user && user._id == c.createdBy._id){ %>
+            <div class="comment-actions">
 
-<% comments.forEach(c => { %>
+                <button class="btn btn-ghost btn-sm"
+                    onclick="toggleEdit('<%= c._id %>')">
+                    ✏️ Edit
+                </button>
 
-<div class="border-b py-3">
+                <form method="POST" action="/comment/delete/<%= c._id %>"
+                    onsubmit="return confirm('Delete comment?');" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm">🗑 Delete</button>
+                </form>
 
-<p><%= c.content %></p>
-<p class="text-gray-500 text-sm">— <%= c.createdBy.fullName %></p>
+            </div>
 
-<% if(user && user._id == c.createdBy._id){ %>
+            <!-- Inline edit -->
+            <form method="POST" action="/comment/edit/<%= c._id %>"
+                class="inline-edit-form" id="edit-<%= c._id %>">
+                <textarea name="content" class="form-control" style="min-height:80px;" required><%= c.content %></textarea>
+                <div style="display:flex;gap:.5rem;">
+                    <button type="submit" class="btn btn-primary btn-sm">Save</button>
+                    <button type="button" class="btn btn-ghost btn-sm"
+                        onclick="toggleEdit('<%= c._id %>')">Cancel</button>
+                </div>
+            </form>
+            <% } %>
 
-<form method="POST" action="/comment/delete/<%= c._id %>" class="inline">
-<button class="text-red-600 mr-3">Delete</button>
-</form>
+        </div>
+        <% }); %>
 
-<form method="POST" action="/comment/edit/<%= c._id %>" class="inline">
-<input name="content" value="<%= c.content %>" class="border p-1 rounded">
-<button class="text-blue-600">Update</button>
-</form>
+        <!-- Add Comment -->
+        <% if(user){ %>
+        <div style="margin-top:2rem;">
+            <h3 style="font-size:1rem;font-weight:600;color:var(--text-2);margin-bottom:.875rem;">Leave a comment</h3>
+            <form method="POST" action="/comment/create">
+                <input type="hidden" name="blogId" value="<%= blog._id %>">
+                <div class="form-group">
+                    <textarea name="content" class="form-control"
+                        placeholder="Share your thoughts…" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary">Post Comment</button>
+            </form>
+        </div>
+        <% } else { %>
+        <div style="margin-top:2rem;padding:1.25rem;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);text-align:center;color:var(--text-2);font-size:.9rem;">
+            <a href="/user/login" style="color:var(--primary);font-weight:600;">Sign in</a> to leave a comment.
+        </div>
+        <% } %>
 
-<% } %>
+    </div>
 
 </div>
-
-<% }) %>
-
-
-<% if(user){ %>
-
-<form method="POST" action="/comment/create" class="mt-6">
-
-<input type="hidden" name="blogId" value="<%= blog._id %>">
-
-<textarea name="content"
-class="w-full border rounded p-2 mb-3"
-placeholder="Write comment..."
-required></textarea>
-
-<button class="bg-blue-600 text-white px-4 py-2 rounded">
-Add Comment
-</button>
-
-</form>
-
-<% } %>
-
 </div>
+
+<script>
+function toggleEdit(id) {
+    const form = document.getElementById('edit-' + id);
+    form.classList.toggle('open');
+}
+</script>
 
 </body>
 </html>

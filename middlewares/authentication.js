@@ -1,25 +1,29 @@
-const jwt = require("jsonwebtoken");
-const { SECRET } = require("../services/auth");
+const { verifyToken } = require("../services/auth");
 
 function checkForAuthenticationCookie(req, res, next) {
 
-    const tokenCookie = req.cookies?.token;
+    const token = req.cookies?.token;
 
-    if (!tokenCookie) {
-        return next();
-    }
+    // No token → guest user → continue
+    if (!token) return next();
 
     try {
 
-        const userPayload = jwt.verify(tokenCookie, SECRET);
+        // verify + decode JWT safely
+        const userPayload = verifyToken(token);
 
+        // attach user to request object
         req.user = userPayload;
 
     } catch (error) {
-        console.log("Invalid token");
+
+        // invalid / expired token → remove it
+        res.clearCookie("token");
+
+        // treat as guest user
     }
 
-    return next();
+    next();
 }
 
 module.exports = {

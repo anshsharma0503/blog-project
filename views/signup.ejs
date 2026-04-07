@@ -1,43 +1,65 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Signup</title>
-<script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Sign Up – BlogApp</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
-<body class="bg-gray-100">
+<body>
 
-<%- include("partials/navbar") %>
+<%- include('partials/navbar') %>
 
-<div class="flex justify-center mt-16">
+<div class="page-wrap" style="display:flex;align-items:center;justify-content:center;min-height:100vh;padding-top:4rem;">
+<div class="container-sm" style="width:100%;">
 
-<form method="POST" action="/user/signup"
-class="bg-white shadow rounded-xl p-8 w-80">
+    <div class="form-card">
 
-<h1 class="text-2xl font-bold mb-6 text-center">Signup</h1>
+        <div style="text-align:center;margin-bottom:1.5rem;">
+            <div style="font-size:2.5rem;margin-bottom:.75rem;">🚀</div>
+            <h1 class="form-title">Create account</h1>
+            <p class="form-subtitle">Join BlogApp and start sharing your stories</p>
+        </div>
 
-<input name="fullName"
-placeholder="Full Name"
-class="w-full border rounded p-2 mb-4"
-required>
+        <form method="POST" action="/user/signup" id="signup-form">
 
-<input name="email"
-type="email"
-placeholder="Email"
-class="w-full border rounded p-2 mb-4"
-required>
+            <div class="form-group">
+                <label class="form-label" for="fullName">Full name</label>
+                <input id="fullName" name="fullName"
+                    class="form-control"
+                    placeholder="Jane Doe" required autocomplete="name">
+            </div>
 
-<input name="password"
-type="password"
-placeholder="Password"
-class="w-full border rounded p-2 mb-4"
-required>
+            <div class="form-group">
+                <label class="form-label" for="email">Email address</label>
+                <input id="email" name="email" type="email"
+                    class="form-control"
+                    placeholder="you@example.com" required autocomplete="email">
+            </div>
 
-<button class="bg-green-600 text-white w-full p-2 rounded hover:bg-green-700">
-Signup
-</button>
+            <div class="form-group">
+                <label class="form-label" for="password">Password</label>
+                <input id="password" name="password" type="password"
+                    class="form-control"
+                    placeholder="At least 6 characters" required minlength="6" autocomplete="new-password">
+            </div>
 
-</form>
+            <button type="submit" class="btn btn-primary btn-block btn-lg" style="margin-top:.5rem;">
+                Create Account
+            </button>
 
+        </form>
+
+        <div class="divider"></div>
+
+        <p style="text-align:center;font-size:.875rem;color:var(--text-3);">
+            Already have an account?
+            <a href="/user/login" style="color:var(--primary);font-weight:600;"> Sign in</a>
+        </p>
+
+    </div>
+
+</div>
 </div>
 
 </body>

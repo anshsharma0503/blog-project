@@ -1,24 +1,37 @@
-<nav class="bg-gray-900 text-white p-4 flex justify-between">
+<nav class="navbar">
+    <div class="container navbar-inner">
 
-    <a href="/" class="font-bold text-lg">BlogApp</a>
+        <a href="/" class="navbar-brand">
+            <span class="brand-emoji">✍️</span>
+            BlogApp
+        </a>
 
-    <div>
+        <div class="navbar-right">
 
-        <% if(user){ %>
+            <% if(user){ %>
 
-            <a href="/blog/new" class="mr-4 hover:underline">Create Blog</a>
+                <a href="/blog/new" class="btn btn-primary btn-sm">
+                    + New Post
+                </a>
 
-            <span class="mr-4"><%= user.fullName %></span>
+                <div class="nav-user">
+                    <div class="avatar" style="width:26px;height:26px;font-size:.68rem;">
+                        <%= user.fullName.charAt(0).toUpperCase() %>
+                    </div>
+                    <span style="font-size:.82rem;color:var(--text-2);">
+                        <%= user.fullName.split(' ')[0] %>
+                    </span>
+                </div>
 
-            <a href="/user/logout" class="hover:underline">Logout</a>
+                <a href="/user/logout" class="btn btn-ghost btn-sm">Logout</a>
 
-        <% } else { %>
+            <% } else { %>
 
-            <a href="/user/login" class="mr-4 hover:underline">Login</a>
-            <a href="/user/signup" class="hover:underline">Signup</a>
+                <a href="/user/login"  class="btn btn-ghost   btn-sm">Login</a>
+                <a href="/user/signup" class="btn btn-primary btn-sm">Sign Up</a>
 
-        <% } %>
+            <% } %>
 
+        </div>
     </div>
-
 </nav>

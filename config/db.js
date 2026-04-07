@@ -1,19 +1,31 @@
-const mongoose=require('mongoose');
+const mongoose = require("mongoose");
 
+// ======================
+// CONNECT DATABASE
+// ======================
+async function connectDb() {
 
+    const mongoURI = process.env.MONGO_URI;
 
-const connectDb=async()=>{
+    if (!mongoURI) {
+        throw new Error("MONGO_URI missing in environment variables");
+    }
+
     try {
 
-        await mongoose.connect(process.env.MONGO_URI);
+        await mongoose.connect(mongoURI, {
+            autoIndex: true,
+        });
 
-        console.log("db connected");
-        
+        console.log("✅ MongoDB connected");
+
     } catch (error) {
 
-        console.log("db error");
-        
+        console.error("❌ MongoDB connection failed:", error.message);
+
+        // Crash the app intentionally if DB fails
+        process.exit(1);
     }
 }
 
-module.exports= connectDb;
+module.exports = connectDb;

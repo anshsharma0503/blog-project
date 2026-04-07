@@ -1,34 +1,101 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>Edit Blog</title>
-<script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+    <title>Edit Post – BlogApp</title>
+    <link rel="stylesheet" href="/style.css">
 </head>
-<body class="bg-gray-100">
+<body>
 
-<%- include("partials/navbar") %>
+<%- include('partials/navbar') %>
 
-<div class="flex justify-center mt-16">
+<div class="page-wrap">
+<div class="container-md" style="padding-top:2.5rem;padding-bottom:4rem;">
 
-<form method="POST" action="/blog/edit/<%= blog._id %>"
-class="bg-white shadow rounded-xl p-8 w-[550px]">
+    <div style="margin-bottom:2rem;">
+        <h1 style="font-family:'Outfit',sans-serif;font-size:1.9rem;font-weight:800;" class="text-gradient">
+            Edit Post
+        </h1>
+        <p style="color:var(--text-3);margin-top:.35rem;">
+            Update your post details below.
+        </p>
+    </div>
 
-<h1 class="text-2xl font-bold mb-6 text-center">Edit Blog</h1>
+    <div class="form-card" style="padding:2rem;">
 
-<input name="title"
-value="<%= blog.title %>"
-class="w-full border rounded p-2 mb-4">
+        <% if(error){ %>
+        <div class="alert alert-error">
+            ⚠️ <%= error %>
+        </div>
+        <% } %>
 
-<textarea name="body"
-class="w-full border rounded p-2 mb-4 h-40"><%= blog.body %></textarea>
+        <form method="POST" action="/blog/edit/<%= blog._id %>" enctype="multipart/form-data" id="edit-form">
 
-<button class="bg-blue-600 text-white w-full p-2 rounded">
-Update Blog
-</button>
+            <div class="form-group">
+                <label class="form-label" for="title">Post Title</label>
+                <input id="title" name="title" class="form-control"
+                    value="<%= blog.title %>" required>
+            </div>
 
-</form>
+            <!-- Current cover + replace -->
+            <div class="form-group">
+                <label class="form-label">Cover Image</label>
+
+                <!-- Current image preview -->
+                <div style="margin-bottom:.75rem;">
+                    <img
+                        src="<%= blog.coverImageURL %>"
+                        alt="Current cover"
+                        style="width:100%;max-height:200px;object-fit:cover;border-radius:var(--radius-sm);border:1px solid var(--border);"
+                        onerror="this.style.display='none';"
+                    >
+                </div>
+
+                <div class="file-upload" onclick="document.getElementById('coverImage').click()">
+                    <input type="file" id="coverImage" name="coverImage"
+                        accept="image/jpeg,image/png,image/gif,image/webp"
+                        onchange="previewNew(this)">
+                    <div class="file-upload-icon">🔄</div>
+                    <p class="file-upload-text">Upload new cover image (optional)</p>
+                    <p class="file-upload-hint">Leave empty to keep current image</p>
+                </div>
+                <img id="new-preview" src="" alt="New preview" style="display:none;width:100%;max-height:200px;object-fit:cover;border-radius:var(--radius-sm);margin-top:.75rem;border:1px solid var(--border);">
+            </div>
+
+            <div class="form-group">
+                <label class="form-label" for="body">Content</label>
+                <textarea id="body" name="body" class="form-control"
+                    style="min-height:300px;" required><%= blog.body %></textarea>
+            </div>
+
+            <div style="display:flex;gap:.75rem;flex-wrap:wrap;">
+                <button type="submit" class="btn btn-primary btn-lg">
+                    💾 Save Changes
+                </button>
+                <a href="/blog/view/<%= blog._id %>" class="btn btn-ghost btn-lg">Cancel</a>
+            </div>
+
+        </form>
+
+    </div>
 
 </div>
+</div>
+
+<script>
+function previewNew(input) {
+    const preview = document.getElementById('new-preview');
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = e => {
+            preview.src = e.target.result;
+            preview.style.display = 'block';
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
 
 </body>
 </html>

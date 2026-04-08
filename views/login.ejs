@@ -21,6 +21,12 @@
             <p class="form-subtitle">Sign in to continue to BlogApp</p>
         </div>
 
+        <% if (locals.error) { %>
+        <div class="alert alert-error" style="margin-bottom: 1.5rem;">
+            ⚠️ <%= error %>
+        </div>
+        <% } %>
+
         <form method="POST" action="/user/signin" id="login-form">
 
             <div class="form-group">

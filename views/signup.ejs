@@ -21,6 +21,12 @@
             <p class="form-subtitle">Join BlogApp and start sharing your stories</p>
         </div>
 
+        <% if (locals.error) { %>
+        <div class="alert alert-error" style="margin-bottom: 1.5rem;">
+            ⚠️ <%= error %>
+        </div>
+        <% } %>
+
         <form method="POST" action="/user/signup" id="signup-form">
 
             <div class="form-group">

@@ -13,7 +13,7 @@ router.get("/login", (req, res) => {
     // already logged in → go home
     if (req.user) return res.redirect("/");
 
-    res.render("login");
+    res.render("login", { error: null });
 });
 
 
@@ -24,7 +24,7 @@ router.get("/signup", (req, res) => {
 
     if (req.user) return res.redirect("/");
 
-    res.render("signup");
+    res.render("signup", { error: null });
 });
 
 
@@ -39,7 +39,7 @@ router.post("/signup", async (req, res) => {
 
         // basic validation
         if (!fullName || !email || !password) {
-            return res.send("All fields required");
+            return res.render("signup", { error: "All fields required" });
         }
 
         // normalize email
@@ -47,7 +47,7 @@ router.post("/signup", async (req, res) => {
 
         // basic password strength (minimal but prevents garbage)
         if (password.length < 6) {
-            return res.send("Password must be at least 6 characters");
+            return res.render("signup", { error: "Password must be at least 6 characters" });
         }
 
         await User.create({
@@ -61,11 +61,11 @@ router.post("/signup", async (req, res) => {
     } catch (error) {
 
         if (error.code === 11000) {
-            return res.send("Email already registered. Try logging in.");
+            return res.render("signup", { error: "Email already registered. Try logging in." });
         }
 
         console.log(error);
-        return res.status(500).send("Signup error");
+        return res.status(500).render("signup", { error: "Signup error" });
 
     }
 
@@ -82,7 +82,7 @@ router.post("/signin", async (req, res) => {
         let { email, password } = req.body;
 
         if (!email || !password) {
-            return res.send("Email and password required");
+            return res.render("login", { error: "Email and password required" });
         }
 
         email = email.toLowerCase().trim();
@@ -94,7 +94,7 @@ router.post("/signin", async (req, res) => {
         const isMatch = user ? await user.comparePassword(password) : false;
 
         if (!user || !isMatch) {
-            return res.send("Invalid Email or Password");
+            return res.render("login", { error: "Invalid Email or Password" });
         }
 
         const token = createTokenForUser(user);
@@ -112,7 +112,7 @@ router.post("/signin", async (req, res) => {
     } catch (error) {
 
         console.log(error);
-        return res.status(500).send("Signin error");
+        return res.status(500).render("login", { error: "Signin error" });
 
     }
 
